@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
+const jwt = require('jsonwebtoken');
 
 // middleware
 app.use(cors());
@@ -28,6 +29,13 @@ async function run() {
     const reviewCollection = client.db("bistroDb").collection("reviews");
     const cartCollection = client.db("bistroDb").collection("carts");
     const usersCollection = client.db("bistroDb").collection("users");
+
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+
+      res.send({ token })
+    });
 
     // users related apis
     app.get('/users', async (req, res) => {

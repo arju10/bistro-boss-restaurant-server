@@ -229,7 +229,7 @@ async function run() {
       */
 
       const payments = await paymentCollection.find().toArray();
-      const revenue = payments.reduce( ( sum, payment) => sum + payment.price, 0)
+      const revenue = payments.reduce((sum, payment) => sum + payment.price, 0)
 
       res.send({
         revenue,
@@ -254,7 +254,7 @@ async function run() {
      * 7. for each category use reduce to get the total amount spent on this category
      * 
     */
-    app.get('/order-stats', async(req, res) =>{
+    app.get('/order-stats', verifyJWT, verifyAdmin, async (req, res) => {
       const pipeline = [
         {
           $lookup: {
@@ -271,7 +271,15 @@ async function run() {
           $group: {
             _id: '$menuItemsData.category',
             count: { $sum: 1 },
-            totalPrice: { $sum: '$menuItemsData.price' }
+            total: { $sum: '$menuItemsData.price' }
+          }
+        },
+        {
+          $project: {
+            category: '$_id',
+            count: 1,
+            total: { $round: ['$total', 2] },
+            _id: 0
           }
         }
       ];
